@@ -1,0 +1,74 @@
+graph TD
+    subgraph Input Layer
+        API[Spring Boot API]
+        VL[Request Validator]
+        TG[Transaction Gateway]
+    end
+
+    subgraph Message Layer
+        KP[Kafka Producer]
+        KT1[Raw Transaction Topic]
+        KT2[Enriched Transaction Topic]
+        KT3[Scored Transaction Topic]
+    end
+
+    subgraph Stream Processing
+        FS[Flink DataStream]
+        subgraph Feature Engineering
+            FW[Feature Window]
+            VC[Velocity Calculator]
+            PC[Pattern Calculator]
+            GC[Geographical Risk]
+            TC[Time Pattern Analysis]
+        end
+    end
+
+    subgraph Decision Engine
+        DR[Drools Rules Engine]
+        ML[ML Predictor]
+        SC[Score Aggregator]
+    end
+
+    subgraph Storage Layer
+        TD[(Transaction DB)]
+        FD[(Feature Store)]
+        RD[(Rules Repository)]
+        CD[(Redis Cache)]
+        HD[(Historical Data)]
+    end
+
+    subgraph Notification System
+        NS[Notification Service]
+        ES[Email Service]
+        SS[SMS Service]
+        WH[Webhook Service]
+        NQ[Notification Queue]
+    end
+
+    API -->|Validate| VL
+    VL -->|Process| TG
+    TG -->|Publish| KP
+    KP -->|Raw| KT1
+    KT1 -->|Stream| FS
+    FS -->|Window| FW
+    FW -->|Calculate| VC
+    FW -->|Analyze| PC
+    FW -->|Check| GC
+    FW -->|Analyze| TC
+
+    FS -->|Enriched| KT2
+    KT2 -->|Evaluate| DR
+    KT2 -->|Score| ML
+    DR -->|Combine| SC
+    ML -->|Combine| SC
+    SC -->|Final| KT3
+
+    KT3 -->|Alert| NS
+    NS -->|Queue| NQ
+    NQ -->|Send| ES
+    NQ -->|Send| SS
+    NQ -->|Send| WH
+
+    style FS fill:#f96,stroke:#333
+    style DR fill:#96f,stroke:#333
+    style ML fill:#9f6,stroke:#333
