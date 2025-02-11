@@ -1,73 +1,74 @@
 graph TD
-    subgraph Input Layer
+    subgraph Transaction Ingestion
         API[Spring Boot API]
-        VL[Request Validator]
-        TG[Transaction Gateway]
-    end
-
-    subgraph Message Layer
         KP[Kafka Producer]
         KT1[Raw Transaction Topic]
-        KT2[Enriched Transaction Topic]
-        KT3[Scored Transaction Topic]
     end
 
-    subgraph Stream Processing
+    subgraph Real-time Processing
         FS[Flink DataStream]
         subgraph Feature Engineering
             FW[Feature Window]
             VC[Velocity Calculator]
             PC[Pattern Calculator]
-            GC[Geographical Risk]
-            TC[Time Pattern Analysis]
         end
+        KT2[Enriched Transaction Topic]
     end
 
-    subgraph Decision Engine
+    subgraph Decision Making
         DR[Drools Rules Engine]
-        ML[ML Predictor]
-        SC[Score Aggregator]
+        ML[ML Predictor Service]
+        KT3[Scored Transaction Topic]
     end
 
-    subgraph Storage Layer
+    subgraph Storage
         TD[(Transaction DB)]
         FD[(Feature Store)]
-        RD[(Rules Repository)]
         CD[(Redis Cache)]
-        HD[(Historical Data)]
     end
 
-    subgraph Notification System
+    subgraph Notification
         NS[Notification Service]
+        KT4[Alert Topic]
         ES[Email Service]
         SS[SMS Service]
-        WH[Webhook Service]
-        NQ[Notification Queue]
     end
 
-    API -->|Validate| VL
-    VL -->|Process| TG
-    TG -->|Publish| KP
-    KP -->|Raw| KT1
-    KT1 -->|Stream| FS
-    FS -->|Window| FW
-    FW -->|Calculate| VC
-    FW -->|Analyze| PC
-    FW -->|Check| GC
-    FW -->|Analyze| TC
+    subgraph Data Pipeline
+        KS[Kafka Streams]
+        SP[Flink Stateful Streaming]
+        DL[(Data Lake)]
+        DW[(Data Warehouse)]
+        BI[BI Dashboard]
+    end
 
-    FS -->|Enriched| KT2
-    KT2 -->|Evaluate| DR
-    KT2 -->|Score| ML
-    DR -->|Combine| SC
-    ML -->|Combine| SC
-    SC -->|Final| KT3
+    subgraph Monitoring
+        PM[Prometheus]
+        GF[Grafana]
+        EK[ELK Stack]
+    end
 
-    KT3 -->|Alert| NS
-    NS -->|Queue| NQ
-    NQ -->|Send| ES
-    NQ -->|Send| SS
-    NQ -->|Send| WH
+    API -->|1| KP
+    KP -->|2| KT1
+    KT1 -->|3| FS
+    FS -->|4| FW
+    FW -->|5| KT2
+    KT2 -->|6a| DR
+    KT2 -->|6b| ML
+    DR -->|7| KT3
+    ML -->|7| KT3
+    KT3 -->|8| NS
+    NS -->|9| KT4
+    KT4 -->|10| ES
+    KT4 -->|10| SS
+
+    KT1 -->|Analytics| KS
+    KT2 -->|Analytics| KS
+    KT3 -->|Analytics| KS
+    KS -->|Process| SP
+    SP -->|Store| DL
+    DL -->|Load| DW
+    DW -->|Visualize| BI
 
     style FS fill:#f96,stroke:#333
     style DR fill:#96f,stroke:#333
